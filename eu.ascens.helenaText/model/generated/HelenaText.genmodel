@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/eu.ascens.helenaText/src-gen" editDirectory="/eu.ascens.helenaText.edit/src"
+    editorDirectory="/eu.ascens.helenaText.editor/src" modelPluginID="eu.ascens.helenaText"
+    forceOverwrite="true" modelName="HelenaText" updateClasspath="false" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container"
+    complianceLevel="6.0" copyrightFields="false" editPluginID="eu.ascens.helenaText.edit"
+    editorPluginID="eu.ascens.helenaText.editor" runtimeVersion="2.11" usedGenPackages="platform:/resource/org.eclipse.xtext.common.types/model/JavaVMTypes.genmodel#//types platform:/resource/org.eclipse.xtext.xbase/model/Xbase.genmodel#//xbase">
+  <genPackages prefix="HelenaText" basePackage="eu.ascens" disposableProviderFactory="true"
+      fileExtensions="helena" ecorePackage="HelenaText.ecore#/">
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="HelenaText.ecore#//MsgDirection">
+      <genEnumLiterals ecoreEnumLiteral="HelenaText.ecore#//MsgDirection/IN"/>
+      <genEnumLiterals ecoreEnumLiteral="HelenaText.ecore#//MsgDirection/OUT"/>
+      <genEnumLiterals ecoreEnumLiteral="HelenaText.ecore#//MsgDirection/INOUT"/>
+    </genEnums>
+    <genClasses ecoreClass="HelenaText.ecore#//Model">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//Model/headPkg"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//PackageDeclaration">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute HelenaText.ecore#//PackageDeclaration/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//PackageDeclaration/compTypes"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//PackageDeclaration/roleTypes"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//PackageDeclaration/ensStructs"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//PackageDeclaration/roleBehaviors"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//ComponentType">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//ComponentType/attrs"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//ComponentType/assocs"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//ComponentType/ops"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//AbstractComponentFieldType"/>
+    <genClasses ecoreClass="HelenaText.ecore#//ComponentAttributeType">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//ComponentAttributeType/type"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//ComponentAssociationType">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference HelenaText.ecore#//ComponentAssociationType/type"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//OperationType">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//OperationType/returnType"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute HelenaText.ecore#//OperationType/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//OperationType/formalDataParamsBlock"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//RoleType">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference HelenaText.ecore#//RoleType/compTypes"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//RoleType/roleattrs"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//RoleType/rolemsgs"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//RoleAttributeType">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//RoleAttributeType/type"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//MessageType">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute HelenaText.ecore#//MessageType/direction"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute HelenaText.ecore#//MessageType/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//MessageType/formalRoleParamsBlock"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//MessageType/formalDataParamsBlock"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//EnsembleStructure">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//EnsembleStructure/rtWithMult"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//RoleTypeWithMultiplicity">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference HelenaText.ecore#//RoleTypeWithMultiplicity/roleType"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute HelenaText.ecore#//RoleTypeWithMultiplicity/min"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute HelenaText.ecore#//RoleTypeWithMultiplicity/max"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute HelenaText.ecore#//RoleTypeWithMultiplicity/capacity"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//RoleBehavior">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference HelenaText.ecore#//RoleBehavior/roleTypeRef"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//Process">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute HelenaText.ecore#//Process/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//Process/processExpr"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//ProcessExpression"/>
+    <genClasses ecoreClass="HelenaText.ecore#//ActionPrefix">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//ActionPrefix/action"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//ActionPrefix/processExpr"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//NondeterministicChoice">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//NondeterministicChoice/first"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//NondeterministicChoice/second"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//IfThenElse">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//IfThenElse/guard"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//IfThenElse/ifProcessExpr"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//IfThenElse/elseProcessExpr"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//ProcessInvocation">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference HelenaText.ecore#//ProcessInvocation/process"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//Action"/>
+    <genClasses ecoreClass="HelenaText.ecore#//AbstractAssignment">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//AbstractAssignment/roleInst"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference HelenaText.ecore#//AbstractAssignment/roleTypeRef"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//AbstractAssignment/compInstance"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//AbstractMessageCall">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute HelenaText.ecore#//AbstractMessageCall/msgName"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//OutgoingMessageCall">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//OutgoingMessageCall/receiver"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//OutgoingMessageCall/actualRoleParamsBlock"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//OutgoingMessageCall/actualDataParamsBlock"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//IncomingMessageCall">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//IncomingMessageCall/formalRoleParamsBlock"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//IncomingMessageCall/formalDataParamsBlock"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//OperationCall">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//OperationCall/variable"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute HelenaText.ecore#//OperationCall/opName"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//OperationCall/actualDataParamsBlock"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//ComponentAttributeSetter">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//ComponentAttributeSetter/attr"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//ComponentAttributeSetter/value"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//RoleAttributeSetter">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//RoleAttributeSetter/attr"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//RoleAttributeSetter/value"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//Label">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute HelenaText.ecore#//Label/name"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//Guard"/>
+    <genClasses ecoreClass="HelenaText.ecore#//Atom"/>
+    <genClasses ecoreClass="HelenaText.ecore#//PlaysQuery">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference HelenaText.ecore#//PlaysQuery/roleTypeRef"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//PlaysQuery/compInstance"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//Relation">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//Relation/left"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute HelenaText.ecore#//Relation/operator"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//Relation/right"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//GuardInParentheses">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//GuardInParentheses/guard"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//AbstractDataValue">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//AbstractDataValue/value"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//BooleanValue"/>
+    <genClasses ecoreClass="HelenaText.ecore#//NumberValue"/>
+    <genClasses ecoreClass="HelenaText.ecore#//StringValue"/>
+    <genClasses ecoreClass="HelenaText.ecore#//ComponentInstance"/>
+    <genClasses ecoreClass="HelenaText.ecore#//ComponentAssociationTypeReference">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference HelenaText.ecore#//ComponentAssociationTypeReference/ref"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//OwnerReference"/>
+    <genClasses ecoreClass="HelenaText.ecore#//AbstractRoleInstance">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute HelenaText.ecore#//AbstractRoleInstance/name"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//RoleInstanceVariable"/>
+    <genClasses ecoreClass="HelenaText.ecore#//FormalRoleParam">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference HelenaText.ecore#//FormalRoleParam/type"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//FormalRoleParamsBlock">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//FormalRoleParamsBlock/params"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//RoleInstanceReference"/>
+    <genClasses ecoreClass="HelenaText.ecore#//AbstractRoleInstanceReference">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference HelenaText.ecore#//AbstractRoleInstanceReference/ref"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//ActualRoleParamsBlock">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//ActualRoleParamsBlock/params"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//AbstractDataVariable">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute HelenaText.ecore#//AbstractDataVariable/name"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//DataVariable"/>
+    <genClasses ecoreClass="HelenaText.ecore#//FormalDataParam">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//FormalDataParam/type"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//FormalDataParamsBlock">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//FormalDataParamsBlock/params"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//DataExpression"/>
+    <genClasses ecoreClass="HelenaText.ecore#//AbstractDataReference"/>
+    <genClasses ecoreClass="HelenaText.ecore#//AbstractDataVariableReference">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference HelenaText.ecore#//AbstractDataVariableReference/ref"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//RoleAttributeTypeReference">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference HelenaText.ecore#//RoleAttributeTypeReference/ref"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//ComponentAttributeTypeReference">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference HelenaText.ecore#//ComponentAttributeTypeReference/ref"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//ActualDataParamsBlock">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//ActualDataParamsBlock/params"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//AbstractDuplicateFreeObject"/>
+    <genClasses ecoreClass="HelenaText.ecore#//AbstractHelenaEntity">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute HelenaText.ecore#//AbstractHelenaEntity/name"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//AbstractFieldType">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute HelenaText.ecore#//AbstractFieldType/name"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//AbstractRoleBehaviorEntity"/>
+    <genClasses ecoreClass="HelenaText.ecore#//AbstractInstance"/>
+    <genClasses ecoreClass="HelenaText.ecore#//DeclaringRoleBehavior">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//DeclaringRoleBehavior/processExpr"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//InvokingRoleBehavior">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//InvokingRoleBehavior/processInvocation"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//InvokingRoleBehavior/processes"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//QuitTerm"/>
+    <genClasses ecoreClass="HelenaText.ecore#//GetAssignment"/>
+    <genClasses ecoreClass="HelenaText.ecore#//CreateAssignment"/>
+    <genClasses ecoreClass="HelenaText.ecore#//OrTerm">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//OrTerm/left"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//OrTerm/right"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//AndTerm">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//AndTerm/left"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//AndTerm/right"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//EqualityTerm">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//EqualityTerm/left"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute HelenaText.ecore#//EqualityTerm/operator"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//EqualityTerm/right"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//NotTerm">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute HelenaText.ecore#//NotTerm/not"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//NotTerm/atom"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//SelfReference"/>
+    <genClasses ecoreClass="HelenaText.ecore#//Addition">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//Addition/left"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute HelenaText.ecore#//Addition/operator"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//Addition/right"/>
+    </genClasses>
+    <genClasses ecoreClass="HelenaText.ecore#//Subtraction">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//Subtraction/left"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute HelenaText.ecore#//Subtraction/operator"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference HelenaText.ecore#//Subtraction/right"/>
+    </genClasses>
+  </genPackages>
+</genmodel:GenModel>

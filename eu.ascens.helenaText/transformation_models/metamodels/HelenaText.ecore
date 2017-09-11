@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="helenaText" nsURI="http://www.ascens.eu/HelenaText" nsPrefix="helenaText">
+  <eClassifiers xsi:type="ecore:EClass" name="Model">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="headPkg" eType="#//PackageDeclaration"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PackageDeclaration">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="compTypes" upperBound="-1"
+        eType="#//ComponentType" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="roleTypes" upperBound="-1"
+        eType="#//RoleType" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ensStructs" upperBound="-1"
+        eType="#//EnsembleStructure" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="roleBehaviors" upperBound="-1"
+        eType="#//RoleBehavior" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractDuplicateFreeObject"/>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractHelenaEntity" eSuperTypes="#//AbstractDuplicateFreeObject">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractFieldType" eSuperTypes="#//AbstractDuplicateFreeObject">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ComponentType" eSuperTypes="#//AbstractHelenaEntity">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="attrs" upperBound="-1"
+        eType="#//ComponentAttributeType" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="assocs" upperBound="-1"
+        eType="#//ComponentAssociationType" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ops" upperBound="-1" eType="#//OperationType"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractComponentFieldType" eSuperTypes="#//AbstractFieldType"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ComponentAttributeType" eSuperTypes="#//AbstractComponentFieldType">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="ecore:EClass http://www.eclipse.org/xtext/common/JavaVMTypes#//JvmTypeReference"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ComponentAssociationType" eSuperTypes="#//AbstractComponentFieldType">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//ComponentType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OperationType" eSuperTypes="#//AbstractDuplicateFreeObject">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="returnType" eType="ecore:EClass http://www.eclipse.org/xtext/common/JavaVMTypes#//JvmTypeReference"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="formalDataParamsBlock"
+        eType="#//FormalDataParamsBlock" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RoleType" eSuperTypes="#//AbstractHelenaEntity">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="compTypes" unique="false"
+        upperBound="-1" eType="#//ComponentType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="roleattrs" upperBound="-1"
+        eType="#//RoleAttributeType" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="rolemsgs" upperBound="-1"
+        eType="#//MessageType" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RoleAttributeType" eSuperTypes="#//AbstractFieldType">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="ecore:EClass http://www.eclipse.org/xtext/common/JavaVMTypes#//JvmTypeReference"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="MessageType" eSuperTypes="#//AbstractDuplicateFreeObject">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="direction" eType="#//MsgDirection"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="formalRoleParamsBlock"
+        eType="#//FormalRoleParamsBlock" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="formalDataParamsBlock"
+        eType="#//FormalDataParamsBlock" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="MsgDirection">
+    <eLiterals name="IN" literal="in"/>
+    <eLiterals name="OUT" value="1" literal="out"/>
+    <eLiterals name="INOUT" value="2" literal="in/out"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EnsembleStructure" eSuperTypes="#//AbstractHelenaEntity">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="rtWithMult" upperBound="-1"
+        eType="#//RoleTypeWithMultiplicity" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RoleTypeWithMultiplicity">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="roleType" eType="#//RoleType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="multiplicity" eType="#//Multiplicity"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="capacity" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Multiplicity"/>
+  <eClassifiers xsi:type="ecore:EClass" name="RoleBehavior" eSuperTypes="#//AbstractDuplicateFreeObject">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="roleTypeRef" eType="#//RoleType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractRoleBehaviorEntity"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Process" eSuperTypes="#//AbstractDuplicateFreeObject #//AbstractRoleBehaviorEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="processTerm" eType="#//ProcessExpression"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ProcessExpression" eSuperTypes="#//AbstractRoleBehaviorEntity"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Label" eSuperTypes="#//AbstractDuplicateFreeObject #//Action">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="IfThenElse" eSuperTypes="#//ProcessExpression">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ifGuard" eType="#//Guard"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ifProcessTerm" eType="#//ProcessExpression"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="orGuards" upperBound="-1"
+        eType="#//Guard" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="orProcessTerms" upperBound="-1"
+        eType="#//ProcessExpression" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ProcessInvocation" eSuperTypes="#//ProcessExpression">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="process" eType="#//Process"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Guard"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Atom"/>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractDataValue" eSuperTypes="#//DataExpression">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="value" eType="ecore:EClass http://www.eclipse.org/xtext/xbase/Xbase#//XExpression"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="BooleanValue" eSuperTypes="#//AbstractDataValue"/>
+  <eClassifiers xsi:type="ecore:EClass" name="NumberValue" eSuperTypes="#//AbstractDataValue"/>
+  <eClassifiers xsi:type="ecore:EClass" name="StringValue" eSuperTypes="#//AbstractDataValue"/>
+  <eClassifiers xsi:type="ecore:EClass" name="PlaysQuery" eSuperTypes="#//Atom">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="roleTypeRef" eType="#//RoleType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="compInstance" eType="#//ComponentInstance"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="GuardInParentheses" eSuperTypes="#//Atom">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="guard" eType="#//Guard"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Action" eSuperTypes="#//AbstractRoleBehaviorEntity"/>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractMessageCall" eSuperTypes="#//Action">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="msgName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OutgoingMessageCall" eSuperTypes="#//AbstractMessageCall">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="receiver" eType="#//AbstractRoleInstanceReference"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="actualRoleParamsBlock"
+        eType="#//ActualRoleParamsBlock" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="actualDataParamsBlock"
+        eType="#//ActualDataParamsBlock" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="IncomingMessageCall" eSuperTypes="#//AbstractMessageCall">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="formalRoleParamsBlock"
+        eType="#//FormalRoleParamsBlock" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="formalDataParamsBlock"
+        eType="#//FormalDataParamsBlock" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OperationCall" eSuperTypes="#//Action">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="variable" eType="#//DataVariable"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="opName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="actualDataParamsBlock"
+        eType="#//ActualDataParamsBlock" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractAssignment" eSuperTypes="#//Action">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="roleInst" eType="#//RoleInstanceVariable"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="roleTypeRef" eType="#//RoleType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="compInstance" eType="#//ComponentInstance"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RoleAttributeSetter" eSuperTypes="#//Action">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="attr" eType="#//RoleAttributeTypeReference"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="value" eType="#//DataExpression"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ComponentAttributeSetter" eSuperTypes="#//Action">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="attr" eType="#//ComponentAttributeTypeReference"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="value" eType="#//DataExpression"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ComponentInstance" eSuperTypes="#//AbstractRoleBehaviorEntity"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ComponentAssociationTypeReference" eSuperTypes="#//ComponentInstance">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ref" eType="#//ComponentAssociationType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OwnerReference" eSuperTypes="#//ComponentInstance"/>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractRoleInstance" eSuperTypes="#//AbstractDuplicateFreeObject #//AbstractRoleBehaviorEntity #//AbstractInstance">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RoleInstanceVariable" eSuperTypes="#//AbstractRoleInstance"/>
+  <eClassifiers xsi:type="ecore:EClass" name="FormalRoleParam" eSuperTypes="#//AbstractRoleInstance">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//RoleType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FormalRoleParamsBlock">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="params" upperBound="-1"
+        eType="#//FormalRoleParam" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RoleInstanceReference" eSuperTypes="#//AbstractRoleBehaviorEntity"/>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractRoleInstanceReference" eSuperTypes="#//RoleInstanceReference">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ref" eType="#//AbstractRoleInstance"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ActualRoleParamsBlock">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="params" upperBound="-1"
+        eType="#//RoleInstanceReference" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractDataVariable" eSuperTypes="#//AbstractDuplicateFreeObject #//AbstractRoleBehaviorEntity #//AbstractInstance">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DataVariable" eSuperTypes="#//AbstractDataVariable"/>
+  <eClassifiers xsi:type="ecore:EClass" name="FormalDataParam" eSuperTypes="#//AbstractDataVariable">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="ecore:EClass http://www.eclipse.org/xtext/common/JavaVMTypes#//JvmTypeReference"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FormalDataParamsBlock">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="params" upperBound="-1"
+        eType="#//FormalDataParam" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DataExpression" eSuperTypes="#//AbstractRoleBehaviorEntity #//Atom"/>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractDataReference" eSuperTypes="#//DataExpression"/>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractDataVariableReference" eSuperTypes="#//AbstractDataReference">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ref" eType="#//AbstractDataVariable"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RoleAttributeTypeReference" eSuperTypes="#//AbstractDataReference">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ref" eType="#//RoleAttributeType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ComponentAttributeTypeReference" eSuperTypes="#//AbstractDataReference">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ref" eType="#//ComponentAttributeType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ActualDataParamsBlock">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="params" upperBound="-1"
+        eType="#//DataExpression" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractInstance"/>
+  <eClassifiers xsi:type="ecore:EClass" name="AtomMultiplicity" eSuperTypes="#//Multiplicity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RangeMulitplicity" eSuperTypes="#//Multiplicity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="min_val" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="max_val" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DeclaringRoleBehavior" eSuperTypes="#//RoleBehavior">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="processTerm" eType="#//ProcessExpression"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="InvokingRoleBehavior" eSuperTypes="#//RoleBehavior">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="processInvocation" eType="#//ProcessInvocation"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="processes" upperBound="-1"
+        eType="#//Process" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="NilTerm" eSuperTypes="#//ProcessExpression"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ActionPrefix" eSuperTypes="#//ProcessExpression">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="action" eType="#//Action"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="processTerm" eType="#//ProcessExpression"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OrTerm" eSuperTypes="#//Guard">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="left" eType="#//Guard"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="right" eType="#//Guard"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AndTerm" eSuperTypes="#//Guard">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="left" eType="#//Guard"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="right" eType="#//Guard"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EqualityTerm" eSuperTypes="#//Guard">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="left" eType="#//Guard"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="operator" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="right" eType="#//Guard"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RelationalTerm" eSuperTypes="#//Guard">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="left" eType="#//Guard"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="operator" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="right" eType="#//Guard"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="NotTerm" eSuperTypes="#//Guard">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="not" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="atom" eType="#//Atom" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="GetAssignment" eSuperTypes="#//AbstractAssignment"/>
+  <eClassifiers xsi:type="ecore:EClass" name="CreateAssignment" eSuperTypes="#//AbstractAssignment"/>
+  <eClassifiers xsi:type="ecore:EClass" name="SelfReference" eSuperTypes="#//RoleInstanceReference"/>
+</ecore:EPackage>

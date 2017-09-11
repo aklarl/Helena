@@ -1,0 +1,100 @@
+// p2p example
+//   all roles are stopped at the end
+//   requester is informed if there is no file
+package p2p_noFile {
+	componentType Peer { 
+		attr boolean hasFile;
+		attr int content;
+		assoc Peer neighbor;
+		op void printFile();
+	}
+	
+	roleType Requester over Peer {
+		roleattr boolean hasFile;
+		rolemsg out reqAddr(Requester req)(); 
+		rolemsg in sndAddr(Provider prov)();
+		rolemsg out reqFile(Requester req)();
+		rolemsg in sndFile()(int content);
+		rolemsg in noFile()();
+		rolemsg out taskDone()();
+	}
+	
+	roleType Router over Peer {
+		rolemsg in/out reqAddr(Requester req)();
+		rolemsg out sndAddr(Provider prov)();
+		rolemsg out noFile()();
+		rolemsg in/out taskDone()();
+	}
+	
+	roleType Provider over Peer {
+		rolemsg in reqFile(Requester req)();
+		rolemsg out sndFile()(int content);
+	} 
+    
+	ensembleStructure TransferEnsemble {
+		<Requester, min=1, max=1, cap=2>;
+		<Router, min=1, max=*, cap=2>;
+		<Provider, min=0, max=1, cap=1>;
+	} 
+ 
+	//TODO not yet working because of nondeterministic choice
+	roleBehavior Requester =
+		router <- create(Router, owner.neighbor) .  
+		router ! reqAddr(self)() .
+		(
+			? sndAddr(Provider prov)() .
+			stateSndAddr .
+			prov ! reqFile(self)() . 
+			? sndFile()(int content) .
+			stateSndFile .
+			owner.content = content . 
+			owner.hasFile = true .
+			self.hasFile = true .
+			owner.printFile() .
+			router ! taskDone()() .
+			quit 
+		+
+		
+			? noFile()() .
+			quit
+		)
+
+	roleBehavior Provider =  
+		? reqFile(Requester req)() .
+		req ! sndFile()(owner.content) . quit
+
+	roleBehavior Router = RouterProc {
+		process RouterProc =
+			? reqAddr(Requester req)() .
+			if (  owner.hasFile ) { 
+				prov <- create(Provider, owner) . 
+				req ! sndAddr(prov)() . quit  
+			}
+			else { 
+				if ( ! plays(Router, owner.neighbor) ) { 
+					routerFwd <- create(Router, owner.neighbor) .
+					routerFwd ! reqAddr(req)() .
+					?taskDone()() .
+					if ( plays(Router, owner.neighbor) ) { 
+						routerDone <- get(Router, owner.neighbor) .
+						routerDone ! taskDone()() .
+						quit
+					}
+					else  { 
+						quit
+					} 
+				}
+				else { 
+					req ! noFile()() . 
+					if ( plays(Router, owner.neighbor) ) { 
+						routerDone2 <- get(Router, owner.neighbor) .
+						routerDone2 ! taskDone()() .
+						quit
+					}
+					else  { 
+						quit
+					} 
+				} 
+			}
+	}
+}

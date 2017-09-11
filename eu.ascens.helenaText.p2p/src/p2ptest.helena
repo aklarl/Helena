@@ -1,0 +1,170 @@
+package p2ptest {
+	componentType Peer {
+		attr int name; // previously String, but changed for promela
+		attr boolean hasFile;
+		attr int content; // previously String, but changed for promela
+//		attr int content;
+		assoc Peer neighbor; 
+		assoc Peer2 neighbor2;
+//		assoc Peer2 neighbor;
+		op void randomStep();
+//		op int randomStep();
+		op int compute(int input, boolean input2);
+	} 
+	
+//	componentType Peer {}
+	
+	componentType Peer2  {
+		assoc Peer gustav;
+		op int compute2(int input, boolean input2);
+	}
+	
+	roleType Requester over Peer {
+		roleattr int fileName; // previously String, but changed for promela
+//		roleattr int content; 
+//		roleassoc Provider provider;
+		rolemsg out reqAddr(Requester req)(); 
+//		rolemsg out reqAddr(Requester req)(); 
+		rolemsg in reqAddr(Requester req)(); 
+//		rolemsg in reqAddr(Requester req)(); 
+		rolemsg in sndAddr(Provider prov)();
+		rolemsg out reqFile(Requester req)();
+		rolemsg in sndFile()(int cont); // previously String, but changed for promela
+	}
+	
+	roleType Requester2 over Peer {
+		roleattr int fileName; // previously String, but changed for promela
+//		roleattr int content; 
+//		roleassoc Provider provider;
+		rolemsg out reqAddr2(Requester2 req)(); 
+//		rolemsg out reqAddr(Requester req)(); 
+		rolemsg in reqAddr2(Requester2 req)(); 
+//		rolemsg in reqAddr(Requester req)(); 
+		rolemsg in sndAddr2(Provider prov)();
+		rolemsg out reqFile2(Requester req)();
+		rolemsg in sndFile2()(int cont); // previously String, but changed for promela
+	}
+	
+//	roleType Requester over Peer2 {}
+	 
+	roleType Router over Peer {
+		rolemsg in/out reqAddr(Requester req)();
+		rolemsg out sndAddr(Provider prov)();
+	}
+	 
+	roleType Router2 over Peer {
+		rolemsg in/out reqAddr2(Requester2 req)();
+		rolemsg out sndAddr2(Provider prov)();
+	}
+	
+	roleType Provider over Peer {
+		rolemsg in reqFile(Requester req)();
+		rolemsg out sndFile()(int cont); // previously String, but changed for promela
+	} 
+    
+	ensembleStructure TransferEnsemble {
+		<Requester, min=1, max=1, cap=2>;
+		<Requester2, min=1, max=1, cap=2>;
+		<Router, min=1, max=*, cap=2>;
+		<Router2, min=1, max=*, cap=2>;
+		<Provider, min=0, max=1, cap=1>;
+//					<Router, 1>, 
+//					<Router, 4 .. 1>,
+	} 
+	
+//	ensembleStructure TransferEnsemble {} 
+  
+  	roleBehavior Router2 = quit
+  
+	roleBehavior Requester2 =
+		router <- create(Router2, owner.neighbor) .
+		
+		if (true) {
+			router2 <- create(Router2, owner.neighbor) .
+			? sndAddr2(Provider prov)() .
+			quit
+		}
+		else {
+			? sndFile2()(int c) .
+			quit
+		}
+	
+	roleBehavior Requester =
+		router <- create(Router, owner.neighbor) .
+//		router <- createRole(Router, owner.neighbor) .
+		router ! reqAddr(self)() .
+		? sndAddr(Provider prov)() .
+		stateSndAddr .
+//		? sndAddr(Provider provider)() .
+		prov ! reqFile(self)() . 
+		? sndFile()(int cont2) .
+		stateSndFile . 
+//		? sndFile()(int cont) .
+		owner.randomStep( ) .
+//		bla = owner.randomStep( ) .
+//		bla2 = owner.compute2(self.content, owner.hasFile) .
+//		bla2 = owner.compute(owner.hasFile) .  
+		cont3 = owner.compute(owner.content, owner.hasFile) .  
+//		bla2 = owner.compute(self.content, owner.hasFile) .
+		owner.content = cont3 . 
+		owner.content = cont2 . 
+//		self.content = bla2 : stateSndAddr. 
+//		self.content = owner.hasFile . 
+//		owner.content = cont .
+//		owner.content = owner.hasFile . 
+		quit 
+	
+	roleBehavior Provider = ProviderProc { 
+		process ProviderProc =
+			? reqFile(Requester req)() . 
+//			? reqAddr(Requester req)()
+			req ! sndFile()(owner.content) .
+			quit
+			
+//		process ProviderProc =
+//			? reqFile(Requester req)() . 
+//			req ! sndFile()(owner.content) . quit
+	} 
+	
+//	roleBehavior Provider =  
+//		? reqFile(Requester req)() . 
+//		req ! sndFile()(owner.content) . quit
+
+	roleBehavior Router = RouterProc {
+//		process RouterProc = ProviderProc
+		
+		process RouterProc =
+//			? sndFile()(int cont) . 
+//			? sndAddr(Provider prov)() .
+			? reqAddr(Requester req)() .
+//			? reqAddr()() .
+//			if ( owner.hasFile && owner.content ) then { ProvideFile }
+//			if ( owner.hasFile && a ) then { ProvideFile }
+			if ( owner.hasFile ) { 			
+				prov <- create(Provider, owner) . 
+				req ! sndAddr(prov)() .
+//				req ! sndAddr(provider)() .
+//				req ! sndAddr(self.provider)() .
+//				req ! sndAddr(self)() . 
+//				req ! sndAddr(p)() .
+//				prov ! sndAddr(prov)() . 
+//				req ! sndAddr()() . 
+				quit
+			} 
+			else { 			
+				if ( plays(Router, owner.neighbor) ) { 
+//					? reqAddr(Requester req)() .
+					router2 <- get(Router, owner.neighbor) .
+					router2 ! reqAddr(req)() .
+					RouterProc
+				}
+				else { 
+//					? reqAddr(Requester req)() .
+					router1 <- create(Router, owner.neighbor) .
+//					router1 <- createRole(Router, owner.neighbor2) .
+					router1 ! reqAddr(req)() .
+					RouterProc 
+				}
+			}
+	}
+}

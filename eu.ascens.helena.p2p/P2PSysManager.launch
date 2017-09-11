@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/eu.ascens.helena.p2p/src/eu/ascens/helena/p2p/P2PSysManager.java"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="1"/>
+</listAttribute>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="eu.ascens.helena.p2p.P2PSysManager"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="eu.ascens.helena.p2p"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Djava.util.logging.config.file=${workspace_loc:eu.ascens.helena.p2p}\src\eu\ascens\helena\p2p\logging.properties"/>
+</launchConfiguration>

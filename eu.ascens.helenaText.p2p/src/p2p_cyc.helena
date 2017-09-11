@@ -1,0 +1,74 @@
+// p2p example
+//   routers route the message infinitely in the peer ring
+package p2p_cyc {
+	componentType Peer { 
+		attr boolean hasFile;
+		attr int content; // previously String, but changed for promela
+		assoc Peer neighbor;
+		op void printFile();
+	}
+	
+	roleType Requester over Peer {
+		roleattr boolean hasFile;
+		rolemsg out reqAddr(Requester req)(); 
+		rolemsg in sndAddr(Provider prov)();
+		rolemsg out reqFile(Requester req)();
+		rolemsg in sndFile()(int content); // previously String, but changed for promela
+	}
+	
+	roleType Router over Peer {
+		rolemsg in/out reqAddr(Requester req)();
+		rolemsg out sndAddr(Provider prov)();
+	}
+	
+	roleType Provider over Peer {
+		rolemsg in reqFile(Requester req)();
+		rolemsg out sndFile()(int content); // previously String, but changed for promela
+	}
+    
+	ensembleStructure TransferEnsemble {
+		<Requester, min=1, max=1, cap=2>;
+		<Router, min=1, max=*, cap=2>;
+		<Provider, min=0, max=1, cap=1>;
+	} 
+ 
+	roleBehavior Requester =
+		router <- create(Router, owner.neighbor) .  
+		router ! reqAddr(self)() .
+		? sndAddr(Provider prov)() .
+		stateSndAddr .
+		prov ! reqFile(self)() . 
+		? sndFile()(int content) .
+		stateSndFile .
+		owner.content = content . 
+		owner.hasFile = true .
+		self.hasFile = true .
+		owner.printFile() .
+		quit 
+
+	roleBehavior Provider =  
+		? reqFile(Requester req)() .
+		req ! sndFile()(owner.content) . 
+		quit
+
+	roleBehavior Router = RouterProc {
+		process RouterProc =
+			? reqAddr(Requester req)() .
+			if (   owner.hasFile ) { 
+				prov <- create(Provider, owner) . 
+				req ! sndAddr(prov)() . quit  
+			}
+			else { 
+				if (   plays(Router, owner.neighbor) ) { 
+					router2 <- get(Router, owner.neighbor) .
+					router2 ! reqAddr(req)() .
+					RouterProc 
+				}
+				else { 
+					router1 <- create(Router, owner.neighbor) .
+					router1 ! reqAddr(req)() .
+					RouterProc 
+				} 
+			}
+	}
+}

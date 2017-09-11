@@ -1,0 +1,176 @@
+\newcommand{\Helena}{\textsc{Helena}}
+\newcommand{\seq}[1]{\vec{#1}}
+
+% code
+\newcommand{\code}[1]{\texttt{#1}}
+
+% messages
+\newcommand{\MsgVar}{\ensuremath{\mathit{msg}}}
+\newcommand{\Msg}{\MsgName(\MsgRidParams)(\MsgParams)}
+\newcommand{\MsgName}{\ensuremath{\mathit{msgnm}}}
+\newcommand{\MsgRidParams}{\ensuremath{\mathit{ridparams}}}
+\newcommand{\MsgDataParams}{\ensuremath{\mathit{dataparams}}}
+\newcommand{\MsgParams}{\ensuremath{\mathit{params}}}
+\newcommand{\MsgActParams}{\ensuremath{\mathit{actparams}}}
+
+% attributes
+\newcommand{\Attr}{A}
+\newcommand{\AttrState}{\Attr-state}
+\newcommand{\AttrStateVar}{\ensuremath{\delta}}
+\newcommand{\DataDomain}{\ensuremath{\mathcal{D}}}
+
+% component type
+\newcommand{\CompTypeVar}{\ensuremath{\mathit{ct}}}
+\newcommand{\CompTypes}{CT}
+\newcommand{\CompTypeName}{\ensuremath{\mathit{nm}}}
+\newcommand{\CompTypeAttrs}{\ensuremath{\mathit{attrs}}}
+%\newcommand{\CompTypeMsgs}{\ensuremath{\mathit{msgs}}}
+%\newcommand{\CompTypeMsgsIn}{\ensuremath{\CompTypeMsgs_{in}}}
+%\newcommand{\CompTypeMsgsOut}{\ensuremath{\CompTypeMsgs_{out}}}
+%\newcommand{\CompTypeMsgsInt}{\ensuremath{\CompTypeMsgs_{int}}}
+
+\newcommand{\INST}[1]{\ensuremath{INST_{#1}}}
+\newcommand{\INSTDef}{\ensuremath{\bigcup_{\CompTypeVar \in \CompTypes}(\INST{\CompTypeVar})}}
+\newcommand{\CompInstVar}{\ensuremath{\mathit{ci}}}
+
+% component connector type
+\newcommand{\CompConnTypeVar}{\ensuremath{\mathit{conn}}}
+
+% roles
+\newcommand{\RoleVar}{\ensuremath{\mathit{rt}}}
+\newcommand{\RoleTypes}{RT}
+\newcommand{\RID}{RID}
+\newcommand{\RoleTuple}{(\RoleName, \RoleCompType, \RoleAttrs, \RoleMsgs)}
+
+\newcommand{\RoleName}{\ensuremath{\mathit{nm}}}
+\newcommand{\RoleCompType}{\ensuremath{\mathit{compTypes}}}
+\newcommand{\RoleAttrs}{\ensuremath{\mathit{roleattrs}}}
+\newcommand{\RoleMsgs}{\ensuremath{\mathit{rolemsgs}}}
+\newcommand{\RoleMsgsIn}{\ensuremath{\RoleMsgs_{in}}}
+\newcommand{\RoleMsgsOut}{\ensuremath{\RoleMsgs_{out}}}
+\newcommand{\RoleMsgsInt}{\ensuremath{\RoleMsgs_{int}}}
+
+% role connector type
+\newcommand{\RoleConnVar}{\ensuremath{\mathit{rct}}}
+\newcommand{\RoleConnTuple}{(\RoleConnName, \RoleConnSource, \RoleConnTarget, \RoleConnMsgs)}
+\newcommand{\RoleConnName}{\ensuremath{\mathit{nm}}}
+\newcommand{\RoleConnSource}{\ensuremath{\mathit{srcType}}}
+\newcommand{\RoleConnTarget}{\ensuremath{\mathit{trgType}}}
+\newcommand{\RoleConnMsgs}{\ensuremath{\mathit{msgs}}}
+\newcommand{\RoleConnConstraints}{\ensuremath{\mathit{rcconstraints}}}
+
+% ensemble structure
+\newcommand{\EnsStructVar}{\ensuremath{\Sigma}}
+\newcommand{\EnsStructTuple}{(\EnsStructRoles, \EnsStructConns)}
+\newcommand{\EnsStructRoles}{\ensuremath{\mathit{roleTypes}}}
+\newcommand{\EnsStructRolesMult}{\textsl{mult}}
+\newcommand{\EnsStructConns}{\ensuremath{\mathit{rconnTypes}}}
+\newcommand{\PeerEnsemble}{\ensuremath{\Sigma_{\mathit{transfer}}}}
+
+% LTS
+\newcommand{\LtsStates}{\ensuremath{\mathit{Q}}}
+\newcommand{\LtsInitState}{\ensuremath{\mathit{q_0}}}
+\newcommand{\LtsLabels}{\ensuremath{\mathit{\Lambda}}}
+\newcommand{\LtsTransitions}{\ensuremath{\mathit{\Delta}}}
+
+% role behavior
+\newcommand{\RoleBehVar}[1]{\ensuremath{\mathit{RoleBeh}_{#1}}}
+\newcommand{\RoleBehTuple}{(\RoleBehStates, \RoleBehInitState, \RoleBehLabels, \RoleBehTransitions)}
+\newcommand{\RoleBehStates}{\ensuremath{\mathit{Q}}}
+\newcommand{\RoleBehStateVar}{\ensuremath{\mathit{q}}}
+\newcommand{\RoleBehInitState}{\ensuremath{\mathit{\RoleBehStateVar_0}}}
+\newcommand{\RoleBehLabels}{\ensuremath{\mathit{\Lambda}}}
+\newcommand{\RoleBehTransitions}{\ensuremath{\mathit{\Delta}}}
+
+% ensemble specification
+\newcommand{\EnsSpec}{ensemble specification}
+\newcommand{\EnsSpecVar}{\ensuremath{\mathit{EnsSpec}}}
+
+% ensemble state
+\newcommand{\EnsState}{\EnsStructVar-ensemble state}
+\newcommand{\EnsStates}{\ensuremath{States_{\Sigma}}}
+\newcommand{\EnsStateVar}{\ensuremath{\sigma}}
+\newcommand{\EnsStateTuple}{(\EnsStateRoleInsts{}, \EnsStateRoles{}, \EnsStateRoleData{}, \EnsStateControl{})}
+
+\newcommand{\EnsStateRoleInsts}[1]{\ensuremath{\mathit{roleinsts}_{#1}}}
+\newcommand{\EnsStateRoleInstsDef}{\ensuremath{\bigcup_{\RoleVar \in \EnsStructRoles(\EnsStructVar)}(\EnsStateRoleInsts{\RoleVar})}}
+\newcommand{\RoleInstVar}{\ensuremath{\mathit{ri}}}
+\newcommand{\EnsStateRoles}[1]{\ensuremath{\mathit{adoptedBy}_{#1}}}
+\newcommand{\EnsStateRolesDef}{\ensuremath{(\EnsStateRoles{\RoleVar})_{\RoleVar \in \EnsStructRoles(\EnsStructVar)}}}
+\newcommand{\EnsStateRoleData}[1]{\ensuremath{\mathit{roledata}_{#1}}}
+\newcommand{\EnsStateRoleDataDef}{\ensuremath{(\EnsStateRoleData{\RoleVar})_{\RoleVar \in \EnsStructRoles(\EnsStructVar)}}}
+\newcommand{\EnsStateControl}[1]{\ensuremath{\mathit{rolestate}_{#1}}}
+\newcommand{\EnsStateControlDef}{\ensuremath{(\EnsStateControl{\RoleVar})_{\RoleVar \in \EnsStructRoles(\EnsStructVar)}}}
+\newcommand{\DataState}{\ensuremath{\mathit{DStates}}}
+\newcommand{\ControlState}{\ensuremath{\mathit{CStates}}}
+
+\newcommand{\EnsStateRoleEnv}[1]{\ensuremath{\mathit{roleenv}_{#1}}}
+\newcommand{\EnsStateRoleEnvDef}{\ensuremath{(\EnsStateRoleEnv{\RoleVar})_{\RoleVar\in\EnsStructRoles(\EnsStructVar)}}}
+
+% Ensemble Model
+\newcommand{\EnsModel}{\EnsStructVar-ensemble automaton}
+\newcommand{\EnsModelVar}{\ensuremath{\mathit{M}}}
+\newcommand{\EnsModelTuple}{(\EnsModelStates, \EnsModelInitState, \EnsModelLabels, \EnsModelTransitions)}
+\newcommand{\EnsModelStates}{\ensuremath{\mathit{S}}}
+\newcommand{\EnsModelInitState}{\ensuremath{\mathit{\sigma_0}}}
+\newcommand{\EnsModelLabels}{\ensuremath{\mathit{L}}}
+\newcommand{\EnsModelLabelsMsgs}{\ensuremath{\mathit{oplabels}}}
+\newcommand{\EnsModelLabelsMgmt}{\ensuremath{\mathit{mgmtlabels}}}
+\newcommand{\RoleInstSrc}{\ensuremath{\mathit{ri}}}
+\newcommand{\RoleInstTrg}{\ensuremath{\mathit{ri'}}}
+\newcommand{\EnsModelLabelJoin}{\ensuremath{\mathbf{adopt}}}
+\newcommand{\EnsModelLabelLeave}{\ensuremath{\mathbf{giveUp}}}
+\newcommand{\EnsModelTransitions}{\ensuremath{\mathit{T}}}
+\newcommand{\EnsStateBefore}{\ensuremath{\sigma_1}}
+\newcommand{\EnsStateAfter}{\ensuremath{\sigma_2}}
+
+\newcommand{\EnsModels}{\ensuremath{\mathbf{EAut}(\EnsStructVar)}}
+
+% Ensemble-Specification Model
+\newcommand{\EnsSpecModels}{\ensuremath{\mathbf{Mod}(\EnsSpecVar)}}
+
+% Role Behaviors as Process Terms
+\newcommand{\nil}{\textbf{nil}}
+\newcommand{\prefix}{.}
+\newcommand{\choice}{+}
+\newcommand{\pll}{||}
+\newcommand{\rec}[2]{\ensuremath{\mu #1.#2}}
+\newcommand{\snd}[4]{\ensuremath{#4!#1(#2)(#3)}}
+\newcommand{\rcv}[3]{\ensuremath{?#1(#2)(#3)}}
+\newcommand{\internal}[2]{\ensuremath{#1(#2)}}
+\newcommand{\create}[3]{\ensuremath{#1 \leftarrow \textbf{create}(#2,#3)}}
+\newcommand{\get}[3]{\ensuremath{#1 \leftarrow \textbf{get}(#2,#3)}}
+\newcommand{\env}{\ensuremath{\rho}}
+\newcommand{\RoleVars}[1]{\ensuremath{\mathit{rolevars}_{#1}}}
+\newcommand{\comm}[5]{\ensuremath{#1(#2)(#3)(#4,#5)}}
+\newcommand{\commcreate}[2]{\ensuremath{#1.\textbf{create}(#2)}}
+\newcommand{\commget}[2]{\ensuremath{#1.\textbf{get}(#2)}}
+
+% for code snippets -> see also http://www.ctan.org/tex-archive/macros/latex/contrib/listings/listings.pdf
+\lstnewenvironment{javacode}[1][]
+{\lstset{
+	language=Java,
+	tabsize=2,
+	mathescape=true,	
+	frame=single,
+	framexleftmargin=1.5em,
+	xleftmargin=2em,
+	%aboveskip=,
+	%belowskip=,
+	%backgroundcolor=\color{yellow},
+	escapeinside='',
+	showstringspaces=false,
+	captionpos=b,
+	numbers=left,
+	numberstyle=\tiny,
+	stepnumber=1,
+	numbersep=5pt,
+	%firstnumber=100
+	basicstyle=\scriptsize\ttfamily,
+	keywordstyle=\bf,
+	morekeywords={Set, add, put},
+	deletekeywords={},
+	identifierstyle=,
+	escapechar=§
+	}
+}{}

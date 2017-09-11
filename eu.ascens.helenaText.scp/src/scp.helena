@@ -1,0 +1,314 @@
+package scp {
+
+	componentType Node {
+		attr int id;
+		attr int reqs;
+		
+		attr int code;
+		attr boolean isExecuting;
+		 
+		assoc Node neighbor;
+		
+		op void printResult();
+	}
+	
+	roleType Deployer over Node {
+		roleattr int appID;
+		roleattr int appReqs;
+		roleattr int appCode;
+		
+		rolemsg out findStorage(Deployer d)(int appID, int foundID);
+		rolemsg in foundStorage(Storage s)();
+		
+		rolemsg out store()(int appID, int appReqs, int appCode);
+	}
+	
+	roleType PotStorage over Node {
+		rolemsg in/out findStorage(Deployer d)(int appID, int foundID);
+		rolemsg in/out createStorage(Deployer d)(int foundID, int startID);
+		rolemsg out foundStorage(Storage s)();
+	}
+
+	roleType Storage over Node {
+		rolemsg in store()(int appID, int appReqs, int appCode);
+		
+		rolemsg out initiate(Storage s)(int appID, int appReqs);
+		
+		rolemsg in reqCode(Executor e)();
+		rolemsg out sndCode()(int appCode);
+	}
+	
+	roleType Initiator over Node {
+		rolemsg in initiate(Storage s)(int appID, int appReqs);
+		
+		rolemsg out findExecutor(Initiator i)(int appReqs);
+		rolemsg in foundExecutor(Executor e)();
+		rolemsg out execute(Initiator i, Storage s)(int appID);
+		rolemsg in executing()();
+		
+		rolemsg out findRequester(Executor e)(int startID);
+	}
+	
+	roleType PotExecutor over Node {
+		rolemsg in/out findExecutor(Initiator i)(int appReqs);
+		rolemsg out foundExecutor(Executor e)();
+	}
+	
+	roleType Executor over Node {
+		rolemsg in execute(Initiator i, Storage s)(int appID);
+		rolemsg out reqCode(Executor e)();
+		rolemsg in sndCode()(int appCode);
+		rolemsg out executing()();
+		
+		rolemsg in reqService(Requester r)();
+		rolemsg out sndService()();
+	}
+	
+	roleType PotRequester over Node {
+		rolemsg in/out findRequester(Executor e)(int startID);
+		rolemsg out inform(Executor e, PotRequester pr)();
+		rolemsg in ackInformation()();
+	}
+	
+	roleType Requester over Node {
+		roleattr boolean hasResult;
+		
+		rolemsg in inform(Executor e, PotRequester pr)();
+		rolemsg out ackInformation()();
+		
+		rolemsg out reqService(Requester r)();
+		rolemsg in sndService()();		
+	}
+	
+	ensembleStructure ScienceCloudPlatform {
+		<Deployer, min = 0, max = 1, cap = 1>;
+		<PotStorage, min = 0, max = *, cap = 2>;
+		<Storage, min = 0, max = 1, cap = 2>;
+		<Initiator, min = 0, max = 1, cap = 2>;
+		<PotExecutor, min = 0, max = *, cap = 2>;
+		<Executor, min = 0, max = 1, cap = 2>;
+		<PotRequester, min = 0, max = *, cap = 2>;
+		<Requester, min = 0, max = *, cap = 2>;
+	}
+	
+	///////////////////////////// BEHAVIORS ///////////////////////////////
+	
+	roleBehavior Deployer = 
+		self.appID = 1234 .
+		self.appReqs = 1234 .
+		self.appCode = 1234 .
+		ps <- create(PotStorage,owner.neighbor) .
+		// assumption: node IDs > 0
+		ps ! findStorage(self)(self.appID,owner.id) . 
+		? foundStorage(Storage s)() .
+		s ! store()(self.appID,self.appReqs,self.appCode) .
+		quit
+	
+	roleBehavior PotStorage = PotStorageProcess {
+		process PotStorageProcess = 		
+			? findStorage(Deployer depl)(int appID,int foundID) .
+			
+			if ( (owner.id-appID < 0 && foundID-appID < 0 && appID-owner.id < appID-foundID)
+				|| 
+				 (owner.id-appID >= 0 && foundID-appID >= 0 && owner.id-appID < foundID-appID)
+				||
+				 (owner.id-appID < 0 && foundID-appID >= 0 && appID-owner.id < foundID-appID)
+				||
+				 (owner.id-appID >= 0 && foundID-appID < 0 && owner.id-appID < appID-foundID)
+			) {
+				if (!plays(PotStorage,owner.neighbor)) {
+					psSmallest1 <- create(PotStorage,owner.neighbor) .
+					psSmallest1 ! findStorage(depl)(appID,owner.id) .
+					SecondRoundTrip
+				}
+				else {
+					psSmallest2 <- get(PotStorage,owner.neighbor) .
+					psSmallest2 ! createStorage(depl)(owner.id,owner.id) .
+					SecondRoundTrip
+				}
+			}
+			// if owner.id is not smallest ID so far 
+			else {
+				if (!plays(PotStorage,owner.neighbor))  {
+					psNotSmallest1 <- create(PotStorage,owner.neighbor) .
+					psNotSmallest1 ! findStorage(depl)(appID,foundID) .
+					SecondRoundTrip
+				}
+				else {
+					psNotSmallest2 <- get(PotStorage,owner.neighbor) .
+					psNotSmallest2 ! createStorage(depl)(foundID,owner.id) .
+					SecondRoundTrip
+				}
+			}	
+		
+		process SecondRoundTrip =
+			? createStorage(Deployer depl2)(int foundID2,int startID) .
+			
+			if (owner.id == foundID2) {
+				if (!plays(Storage,owner)) {
+					s <- create(Storage,owner) .
+					depl2 ! foundStorage(s)() .
+					if (owner.id != startID)  {
+						if (plays(PotStorage,owner.neighbor)) {
+							psFwd1 <- get(PotStorage,owner.neighbor) .
+							psFwd1 ! createStorage(depl2)(foundID2,startID) .
+							quit
+						}
+						// should never happen
+						else {
+							quit
+						}
+					}
+					else {
+						quit
+					}
+				}
+				// should not happen
+				else {
+					quit
+				}
+			}
+			else {
+				if (owner.id != startID)  {
+					if (plays(PotStorage,owner.neighbor)) {
+						psFwd2 <- get(PotStorage,owner.neighbor) .
+						psFwd2 ! createStorage(depl2)(foundID2,startID) .
+						quit
+					}
+					// should never happen
+					else {
+						quit
+					}
+				}
+				else {
+					quit
+				}
+			}
+	}
+
+	roleBehavior Storage = 
+		? store()(int appID, int appReqs, int appCode) .
+		owner.code = appCode .
+		
+		i <- create(Initiator,owner) .
+		i ! initiate(self)(appID,appReqs) .
+		 
+		? reqCode(Executor e)() .
+		e ! sndCode()(owner.code) .
+		
+		quit //finished since code is stored on Node (we do not have the concept of undeploying)
+	
+	roleBehavior Initiator = 
+		? initiate(Storage s)(int appID,int appReqs) .
+		
+		pe <- create(PotExecutor,owner) .
+		pe ! findExecutor(self)(appReqs) .
+		? foundExecutor(Executor e)() .
+		e ! execute(self,s)(appID) .
+		? executing()() .
+		
+		pr <- create(PotRequester,owner.neighbor) .
+		pr ! findRequester(e)(owner.id) .
+				
+		quit //finished since all requesters have been informed (we do not have the concept of explicitly stopping)
+
+	
+	roleBehavior PotExecutor = 
+		? findExecutor(Initiator i)(int appReqs) .
+				
+		// assumption: at least one node in the network that satisfies requirements
+		 
+		// if the node satisfies the requirements
+		if (owner.reqs == appReqs) {
+			if (!plays(Executor,owner)) {
+				// if the node is ready to execute
+				e <- create(Executor,owner) .
+				i ! foundExecutor(e)() .
+				quit	
+			}
+			// should never happen
+			else {
+				quit
+			}
+		}
+		// if the node does not satisfy the requirements
+		else {
+			if (!plays(PotExecutor,owner.neighbor)) {
+				pe <- create(PotExecutor,owner.neighbor) .
+				pe ! findExecutor(i)(appReqs) .
+				quit
+			}
+			// should never happen
+			else {
+				quit
+			}
+		}
+	
+	roleBehavior Executor = ExecutorProcess {
+		process ExecutorProcess =
+			? execute(Initiator i, Storage s)(int appID) .
+			
+			s ! reqCode(self)() .
+			? sndCode()(int appCode) .
+			owner.isExecuting = true .
+			i ! executing()() .
+			
+			ExecutorRunning
+			
+		process ExecutorRunning = 
+			? reqService(Requester r)() .
+			r ! sndService()() .
+			ExecutorRunning
+	}
+	
+	roleBehavior PotRequester = PotRequesterProcess {
+		process PotRequesterProcess = 		
+			? findRequester(Executor e)(int startID) .
+			
+			if (plays(Requester,owner)) {
+				r <- get(Requester,owner) .
+				r ! inform(e,self)() .
+				? ackInformation()() .
+				if (owner.id != startID) {
+					if (!plays(PotRequester,owner.neighbor)) {
+						pr1 <- create(PotRequester,owner.neighbor) .
+						pr1 ! findRequester(e)(startID) .
+						quit
+					}
+					// should never happen
+					else {
+						quit
+					}
+				}
+				else {
+					quit
+				}
+			}
+			else {
+				if (owner.id != startID) {
+					if (!plays(PotRequester,owner.neighbor)) {
+						pr2 <- create(PotRequester,owner.neighbor) .
+						pr2 ! findRequester(e)(startID) .
+						quit
+					}
+					// should never happen
+					else {
+						quit
+					}
+				}
+				else {
+					quit
+				}
+			}
+	}
+	
+	roleBehavior Requester = 
+		? inform(Executor e, PotRequester pr)() .
+		pr ! ackInformation()() .
+		
+		e ! reqService(self)() .
+		? sndService()() .
+		self.hasResult = true .
+		owner.printResult() .
+		quit
+}

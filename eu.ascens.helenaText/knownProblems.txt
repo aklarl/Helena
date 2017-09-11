@@ -1,0 +1,17 @@
+
+Problems and ideas for solutions: 
+=================================
+
+Two Xtext projects in one workspace causes the following problems: 
+(1) Binding Problem, when two Xtext projects exist in one workspace: 
+	error message that HelenaTextScopingProvider is not bound
+	--> Workaround: use 'fresh' eclipse and 'fresh' workspace
+	
+(2) Error when starting new runtime environment with helenaText and adaptiveHelenaText 
+	plug-in: 
+	When opening a helena file the helenaText editor does open with errors and does not 
+	show the file
+
+	--> Make sure that eclipse projects for all loaded plug-ins do have the same java version 
+		set in the build path + 
+		set the same java version/execution enviroment in the launch configuration!

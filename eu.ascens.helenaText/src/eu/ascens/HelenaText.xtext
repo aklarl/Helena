@@ -1,0 +1,372 @@
+/*
+ *  The Helena workbench is an Eclipse plugin for the development of ensemble-based systems
+ *  according to the Helena approach. It is fully documented in the PhD 
+ *  thesis "Helena - Handling massively distributed systems with ELaborate 
+ *  ENsemble Architectures" by Annabelle Klarl in 2016.
+ 
+ *  Website: http://www.pst.ifi.lmu.de/Personen/team/klarl/helena.html
+ *  PhD thesis: https://edoc.ub.uni-muenchen.de/20087/
+ *
+ *  Copyright (C) 2013-2017  Annabelle Klarl
+ *  All rights reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ * 
+ */
+grammar eu.ascens.HelenaText with org.eclipse.xtext.xbase.Xbase
+
+generate helenaText "http://www.ascens.eu/HelenaText"
+import 'http://www.eclipse.org/xtext/xbase/Xbase' as xbase
+
+////////// MODEL /////////////
+Model:
+	headPkg = PackageDeclaration
+;
+
+PackageDeclaration:
+	'package' name=QualifiedName '{'
+			(compTypes += ComponentType)*
+		&	(roleTypes += RoleType)*
+		&	(ensStructs += EnsembleStructure)*
+		&	(roleBehaviors += RoleBehavior)*
+	'}'
+;
+
+////////// COMPONENT TYPE /////////////
+ComponentType:
+	'componentType' name=ValidID '{' 
+		(
+				attrs	+= ComponentAttributeType
+			|	assocs	+= ComponentAssociationType
+			|	ops		+= OperationType
+		)* 
+	'}'
+;
+AbstractComponentFieldType: 
+	ComponentAttributeType |
+	ComponentAssociationType
+;
+ComponentAttributeType:
+	'attr' type=JvmTypeReference name=ValidID ';'
+;
+ComponentAssociationType:
+	'assoc' type=[ComponentType] name=ValidID ';'
+;
+OperationType:
+	'op' returnType=JvmTypeReference  name=ValidID formalDataParamsBlock=FormalDataParamsBlock ';'
+;
+
+///////////// ROLE TYPE /////////////////
+RoleType:
+	'roleType' name=ValidID 'over' compTypes+=[ComponentType](','compTypes+=[ComponentType])* '{'
+		(
+				roleattrs	+=	RoleAttributeType
+			|	rolemsgs	+=	MessageType
+		)*
+	'}'
+;
+RoleAttributeType:
+	'roleattr' type=JvmTypeReference name=ValidID ';'
+;
+MessageType:
+	'rolemsg' direction=MsgDirection name=ValidID formalRoleParamsBlock=FormalRoleParamsBlock formalDataParamsBlock=FormalDataParamsBlock ';'
+;
+enum MsgDirection :
+		IN	= 'in' 
+	|	OUT = 'out' 
+	|	INOUT = 'in/out'
+;
+
+///////////// ENSEMBLE STRUCTURE /////////////
+EnsembleStructure:
+	'ensembleStructure' name=ValidID '{'
+		rtWithMult+=RoleTypeWithMultiplicity (rtWithMult+=RoleTypeWithMultiplicity)*
+	'}'
+;
+RoleTypeWithMultiplicity:
+	'<'
+		roleType=[RoleType]
+		','
+		'min' '=' min=MultElem
+		','
+		'max' '=' max=MultElem
+		','
+		'cap' '=' capacity=INT
+	'>'
+	';'
+;
+MultElem:
+	('*' | INT)
+;
+
+////////// ROLE BEHAVIORS /////////
+RoleBehavior:
+		{DeclaringRoleBehavior} 'roleBehavior' roleTypeRef=[RoleType] '=' processExpr=ProcessExpression
+	| 	{InvokingRoleBehavior} 'roleBehavior' roleTypeRef=[RoleType] '=' processInvocation=ProcessInvocation 
+			'{' (processes+=Process)* '}'
+;
+Process:
+	'process' name=ValidID '=' processExpr=ProcessExpression
+;
+
+////////// PROCESS TERMS /////////
+ProcessExpression:
+		{QuitTerm} 'quit'
+	|	ActionPrefix
+	|	NondeterministicChoice
+	|	IfThenElse
+	|	ProcessInvocation
+;
+ActionPrefix:
+	action=Action '.' processExpr=ProcessExpression
+;
+NondeterministicChoice:
+	'(' first=ProcessExpression '+' second=ProcessExpression ')'
+;
+IfThenElse:
+	'if' '(' guard=Guard ')' '{' ifProcessExpr=ProcessExpression '}'
+	'else' '{' elseProcessExpr=ProcessExpression '}'
+;
+ProcessInvocation:
+	process=[Process]
+;
+
+///////// ACTIONS //////////////
+Action: 
+		AbstractAssignment
+	|	AbstractMessageCall
+	|	OperationCall
+	|	ComponentAttributeSetter
+	|	RoleAttributeSetter
+	|	Label
+;
+AbstractAssignment: 
+		{GetAssignment} roleInst=RoleInstanceVariable '<-' 'get' '(' roleTypeRef=[RoleType] ',' compInstance=ComponentInstance ')'
+	|	{CreateAssignment} roleInst=RoleInstanceVariable '<-' 'create' '(' roleTypeRef=[RoleType] ',' compInstance=ComponentInstance ')'
+;
+AbstractMessageCall:
+		OutgoingMessageCall
+	|	IncomingMessageCall
+;
+OutgoingMessageCall:
+	receiver=AbstractRoleInstanceReference '!' 
+		msgName=ValidID
+		actualRoleParamsBlock=ActualRoleParamsBlock 
+		actualDataParamsBlock=ActualDataParamsBlock
+;
+IncomingMessageCall:
+	'?'  msgName=ValidID formalRoleParamsBlock=FormalRoleParamsBlock formalDataParamsBlock=FormalDataParamsBlock
+;
+OperationCall:
+	(variable=DataVariable '=')? 'owner.' opName=ValidID  actualDataParamsBlock=ActualDataParamsBlock
+;
+ComponentAttributeSetter:
+	attr=ComponentAttributeTypeReference '=' value=DataExpression
+;
+RoleAttributeSetter:
+	attr=RoleAttributeTypeReference '=' value=DataExpression
+;
+Label:
+	name=ValidID
+;
+
+//////////// GUARDS //////////////
+Guard: 
+	OrTerm
+;
+OrTerm returns Guard:
+	AndTerm ({OrTerm.left=current} '||' right=AndTerm )*
+;
+AndTerm returns Guard:
+	EqualityTerm ({AndTerm.left=current} '&&' right=EqualityTerm)*
+;
+EqualityTerm returns Guard: 
+	NotTerm ({EqualityTerm.left=current}	operator=OpEquality right=NotTerm)*
+;
+NotTerm returns Guard:
+	{NotTerm}
+	(not='!')? atom=Atom
+;
+Atom:
+		DataExpression
+	|	PlaysQuery
+	|	Relation
+	|	GuardInParentheses
+;
+PlaysQuery:
+	'plays' '(' roleTypeRef=[RoleType] ',' compInstance=ComponentInstance ')'
+;
+Relation: 
+	left=DataExpression operator=OpCompare right=DataExpression
+;
+GuardInParentheses:
+	'(' guard=Guard ')'
+;
+AbstractDataValue: 
+	BooleanValue|
+	NumberValue | 
+	StringValue
+;
+BooleanValue: 
+	value = XBooleanLiteral
+;
+NumberValue: 
+	value = XNumberLiteral
+;
+StringValue: 
+	value = XStringLiteral
+;
+OpEquality:
+	'==' | '!='	;
+OpCompare:
+	'>=' | '<' '=' | '>' | '<' ;
+
+//////// COMPONENT INSTANCES ///////////////
+ComponentInstance:
+		ComponentAssociationTypeReference
+	|	OwnerReference
+;
+ComponentAssociationTypeReference:
+	'owner.' ref=[ComponentAssociationType]
+;
+OwnerReference:
+	{OwnerReference} 'owner'
+;
+
+/////////// ROLE INSTANCES /////////////////
+AbstractRoleInstance:
+		RoleInstanceVariable
+	|	FormalRoleParam
+;
+RoleInstanceVariable: 
+	name=ValidID
+;
+FormalRoleParam : 
+	type=[RoleType] name=ValidID
+;
+FormalRoleParamsBlock:
+	{FormalRoleParamsBlock}
+	'('
+		( params+=FormalRoleParam (',' params += FormalRoleParam)* )?
+	')'
+;
+
+///////// ROLE INSTANCE REFERENCES ///////////////
+RoleInstanceReference:
+		AbstractRoleInstanceReference
+	|	{SelfReference} 'self'
+;
+AbstractRoleInstanceReference:
+	ref=[AbstractRoleInstance]
+;
+ActualRoleParamsBlock:
+	{ActualRoleParamsBlock}
+	'('
+		( params+=RoleInstanceReference (',' params += RoleInstanceReference)* )?
+	')'
+;
+
+/////////// DATA INSTANCES /////////////////
+AbstractDataVariable:
+		FormalDataParam
+	|	DataVariable
+;
+DataVariable:
+	name=ValidID
+;
+FormalDataParam: 
+	type=JvmTypeReference name=ValidID
+;
+FormalDataParamsBlock:
+	{FormalDataParamsBlock} 
+	'('
+		( params+=FormalDataParam (',' params+=FormalDataParam)* )?
+	')'
+;
+
+/////////// DATA INSTANCE REFERENCES /////////////////
+DataExpression:
+		SimpleDataExpression
+	|	Addition
+	|	Subtraction;
+Addition returns DataExpression:
+	SimpleDataExpression ({Addition.left=current} operator="+" right=SimpleDataExpression)
+;
+Subtraction returns DataExpression:
+	SimpleDataExpression ({Subtraction.left=current} operator="-" right=SimpleDataExpression)
+;
+SimpleDataExpression returns DataExpression:
+		AbstractDataReference
+	|	AbstractDataValue
+;
+AbstractDataReference: 
+		AbstractDataVariableReference
+	|   RoleAttributeTypeReference
+	|	ComponentAttributeTypeReference
+;
+AbstractDataVariableReference:
+	ref=[AbstractDataVariable]
+;
+RoleAttributeTypeReference:
+	'self.' ref=[RoleAttributeType]
+;
+ComponentAttributeTypeReference:
+	'owner.' ref=[ComponentAttributeType]
+;
+ActualDataParamsBlock:
+	{ActualDataParamsBlock}
+	'('
+		( params+=DataExpression (',' params += DataExpression)* )?
+	')'
+;
+
+///////////// AUXILIARIES //////////////////
+// Parent for Helena objects that should be duplicate free
+ AbstractDuplicateFreeObject:	
+ 		AbstractHelenaEntity
+	|	AbstractFieldType
+	|	MessageType
+	|	OperationType 
+	|	RoleBehavior
+	|	Process
+	|	Label
+	|	AbstractRoleInstance
+	|	AbstractDataVariable
+;
+// Parent for all structural entities of Helena
+AbstractHelenaEntity:
+		ComponentType 
+	|	RoleType
+	|	EnsembleStructure 
+;
+// Parent for all fields (component or role attributes and component associations)
+AbstractFieldType:
+		AbstractComponentFieldType
+	|	RoleAttributeType
+;
+// Parent for entities used in a role behavior
+AbstractRoleBehaviorEntity:
+		Process
+	|	ProcessExpression
+	|	Action
+	|	ComponentInstance
+	|	RoleInstanceReference
+	|	AbstractRoleInstance
+	|	AbstractDataVariable
+	|	DataExpression
+;
+// Parent for all instances
+AbstractInstance: 
+	AbstractDataVariable |
+	AbstractRoleInstance
+;

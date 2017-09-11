@@ -1,0 +1,44 @@
+% for code fonts
+\usepackage[scaled]{beramono}
+\usepackage[T1]{fontenc}
+
+\usepackage{tikz}
+\usetikzlibrary{shapes}
+\usetikzlibrary{positioning}
+\usetikzlibrary{calc}
+\usetikzlibrary{fit}
+\usetikzlibrary{automata}
+
+% for slide overlays
+\tikzset{
+  invisible/.style={opacity=0},
+  visible on/.style={alt={#1{}{invisible}}},
+  alt/.code args={<#1>#2#3}{%
+    \alt<#1>{\pgfkeysalso{#2}}{\pgfkeysalso{#3}}
+  },
+}
+
+\makeatletter
+\tikzset{font append/.style={font/.expand once=\tikz@textfont #1},
+         font append/.value required}
+\tikzset{anchor/.append code=\let\tikz@auto@anchor\relax}
+\makeatother
+
+% class style with two compartements
+\tikzstyle{class2}=[font append=\ttfamily,draw,rectangle split,rectangle split parts=2,rectangle split part align={center,left},every one node part/.style={align=center}]
+% class style with three compartements
+\tikzstyle{class3}=[font append=\ttfamily,draw,rectangle split,rectangle split parts=3,rectangle split part align={center,left,left},every one node part/.style={align=center}]
+% component instance style
+\tikzstyle{ci} = [font append=\ttfamily,rectangle,draw,align=center,node distance=1cm]
+% role style
+\tikzstyle{role} = [font append=\ttfamily,rectangle,align=center,node distance=1cm]
+% role instance style
+\tikzstyle{ri} = [font append=\ttfamily,rectangle,draw,align=center,node distance=1cm]
+% state style
+\tikzstyle{state} = [font append=\ttfamily,ellipse,draw,align=center,inner sep=1pt]
+% dependency arrow style
+\tikzstyle{dependency} = [font append=\ttfamily,->,dashed]
+% message arrow style
+\tikzstyle{msg} = [font append=\ttfamily,->,thick]
+
+\newcommand{\stereotype}[1]{\flqq {#1}\frqq}

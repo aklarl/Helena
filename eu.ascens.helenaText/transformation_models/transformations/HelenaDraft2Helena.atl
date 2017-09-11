@@ -1,0 +1,737 @@
+-- @atlcompiler emftvm
+
+module HelenaDraft2Helena;
+create OUT : HelenaText refining IN : HelenaText;
+
+--has to be first!
+rule IncrementTmpCounterByValue(value : Integer){
+	to
+		nothing : HelenaText!ProcessInvocation()
+	do{
+		thisModule.TMP_COUNTER 	<- (thisModule.TMP_COUNTER + value);
+		thisModule.TMP_COUNTER;
+	}
+}
+rule ResetTmpCounter(){
+	to
+		nothing: HelenaText!ProcessInvocation()
+	do{
+		thisModule.TMP_COUNTER <- 1;
+		true;
+	}
+}
+
+rule SetTmpCounter(newCounterValue : Integer){
+	to
+		nothing : HelenaText!ProcessInvocation()
+	do{
+		thisModule.TMP_COUNTER <- newCounterValue;
+		true;
+	}
+}
+
+
+rule InvokingRoleBehavior2InvokingRoleBehavior{
+	from 
+		modeRB : HelenaText!InvokingRoleBehavior(
+			thisModule.isModeRoleBehavior(modeRB)
+		)
+		--processInvocation, processes
+	using{
+		originalProcs : Set(HelenaText!Process) = Set{modeRB.processes}.flatten();	
+	}
+	to
+		trgRB: HelenaText!InvokingRoleBehavior(
+			--only create and init processes with names
+			roleTypeRef <- modeRB.roleTypeRef,
+			processes <- thisModule.initModeBehaviorProcessesFromOriginalProcesses(modeRB, modeRB.processes) 		
+		)
+	 	--processInvocation, processes
+	do{
+		
+		--make role behavior invoke the new init process 
+		trgRB.processInvocation <- thisModule.MakeProcessInvocation(
+			thisModule.findProcess(trgRB.processes, thisModule.getInitModeProcName(trgRB))
+		);
+
+
+		--- Fill procs with content
+		--- (a) original procs: 				replace action prefix with process invocation
+		--- (b) init proc: 						make resume process term and invocate original init proc 
+		--- (c) new procs from action prefs:	make conditional selection with interrupt/resume and actions
+
+		--init range and sets
+		thisModule.range <-Set{}.includingRange(1,1000);
+		thisModule.ALREADY_HANDLED <- Set{};
+		thisModule.ALREADY_HANDLED_AP <- Set{};
+		thisModule.COUNTER_PER_PROCESS <- 1;
+		thisModule.COUNTER_PER_PROCESS_AP <- 1;
+
+		
+		trgRB.processes.debug('\nExisting processes for RB --->>>');
+		--- (a) original procs and (c) new procs
+		
+		for(originalProc in thisModule.getOriginalProcs(trgRB.processes, originalProcs)){
+			originalProc.name.debug('(1) original process');
+			
+			--if new procs to invoke exist for current process
+			if(thisModule.getNewProcs(trgRB.processes, originalProcs, trgRB).size() > 0){
+				
+				--(1) replace action prefixes with process invocations in original process
+				originalProc.processTerm <- originalProc.processTerm.handleProcessTerm(
+					
+					--get new procs (corresponding to current proc) and select first on to be invoked next
+					thisModule.getNewProcsForOriginalProc(
+						thisModule.getNewProcs(trgRB.processes, originalProcs, trgRB), 
+						originalProc
+					), 
+					-1
+				);
+
+				
+				--(2) init the new procs corresponding to the current original process
+				for(newProc in thisModule.getNewProcsForOriginalProc(
+					thisModule.getNewProcs(trgRB.processes, originalProcs, trgRB),originalProc )
+				){
+					newProc.debug('new process');
+					--update counter: get lowest unhandled counter
+					thisModule.ALREADY_HANDLED;
+					thisModule.COUNTER_PER_PROCESS <- thisModule.getNextHigherCounter();
+					thisModule.COUNTER_PER_PROCESS_AP <- thisModule.getNextHigherCounterAP();
+					
+					
+					newProc.processTerm <- thisModule.MakeInterruptResumeProcTerm(
+					
+						--current action prefix from corresponding original process
+						thisModule.getNextActionPrefix(
+							--all action prefixes from corresponding original process
+							thisModule.findProcess(
+								trgRB.processes, thisModule.getOriginalProcessName(newProc.name)
+							).processTerm.getActionPrefixes(Sequence{}), 
+							
+							--counter per process
+							thisModule.COUNTER_PER_PROCESS_AP
+						) ,
+		
+						--self proc to invocate
+						newProc, 
+						
+						--next procs to invocate
+						thisModule.getNewProcs(trgRB.processes, originalProcs, trgRB)
+					
+					);
+					
+					--reset tmp counter for conditional selections
+					thisModule.ResetTmpCounter();
+				
+				}
+			
+				--reset link counter
+				thisModule.COUNTER_PER_PROCESS <- 1;
+				thisModule.ALREADY_HANDLED <- Set{};
+				--reset action pref counter
+				thisModule.COUNTER_PER_PROCESS_AP <- 1;
+				thisModule.ALREADY_HANDLED_AP <- Set{};
+				
+			}
+				
+		}
+		--- (b) init proc
+		for(initProc in thisModule.getInitProc(trgRB.processes, trgRB)){ --use loop to create initProc variable 
+			--TODO: check that only one init proc exists 			
+			
+			initProc.name.debug('(2) init process');
+			initProc.processTerm <- thisModule.MakeResumeProcessTerm(
+				--pass original init process as process to be invocated from new init
+				thisModule.findProcess(
+					trgRB.processes, 
+					modeRB.processInvocation.process.name
+				)
+			);
+		}
+		
+		trgRB.debug('finished Invoking2Invoking RB');
+	}
+}
+
+rule DeclaringRoleBehavior2InvokingRoleBehavior{
+	from 
+		modeRB : HelenaText!DeclaringRoleBehavior(
+			thisModule.isModeRoleBehavior(modeRB)
+		)
+		-- processTerm
+	to
+		trgRB: HelenaText!InvokingRoleBehavior(
+			roleTypeRef <- modeRB.roleTypeRef,
+			processes <- thisModule.initModeBehaviorProcessesFromOriginalProcessTerm(modeRB, modeRB.processTerm)
+		)
+	 	--processInvocation, processes
+	do{
+		trgRB.processInvocation <- thisModule.MakeProcessInvocation(
+			thisModule.findProcess(trgRB.processes, thisModule.getInitModeProcName(trgRB))
+		); -- invocate init proc
+		
+		
+		--init range
+		thisModule.range <-Set{}.includingRange(1,1000);
+		thisModule.ALREADY_HANDLED <- Set{};
+		thisModule.ALREADY_HANDLED_AP <- Set{};
+		thisModule.COUNTER_PER_PROCESS <- 1;
+		thisModule.COUNTER_PER_PROCESS_AP <- 1;
+		
+		trgRB.processes.debug('\nExisting processes for RB--->>>');
+		
+		
+		--- (a) original process term -> main proc + (c) new procs
+		for(mainProc in thisModule.getMainProc(trgRB.processes, trgRB)){
+			mainProc.name.debug('(1) main process');
+			
+			--if new procs to invoke exist for current process
+			if(thisModule.filterInitAndMainProc(trgRB.processes, trgRB).size() > 0){
+				
+				--(1) handle main process
+				mainProc.processTerm <- mainProc.processTerm.handleProcessTerm(
+					
+					--get new procs (corresponding to current proc) and select first on to be invoked next
+					thisModule.filterInitAndMainProc(trgRB.processes, trgRB)->select(proc | 
+						proc.name.toString().startsWith(mainProc.name + thisModule.SEPARATOR)	
+					)
+					, -1
+				);
+				
+				--(2) handle new processes
+				for(newProc in thisModule.filterInitAndMainProc(trgRB.processes, trgRB)){
+
+					--update counter: get lowest unhandled counter
+					thisModule.COUNTER_PER_PROCESS <- thisModule.getNextHigherCounter();
+					thisModule.COUNTER_PER_PROCESS_AP <- thisModule.getNextHigherCounterAP();
+					
+					--Get original proc related to this new proc
+					newProc.name.debug('new proc');
+
+					newProc.processTerm <- thisModule.MakeInterruptResumeProcTerm(
+					
+					
+						--current action prefix from corresponding original process
+						thisModule.getNextActionPrefix(
+							--all action prefixes from corresponding original process
+							thisModule.findProcess(
+								trgRB.processes, thisModule.getOriginalProcessName(newProc.name)
+							).processTerm.getActionPrefixes(Sequence{}),
+							
+							--counter per process
+							thisModule.COUNTER_PER_PROCESS_AP
+						),				
+		
+						--self proc to invocate
+						newProc, 
+						
+						--next procs to invocate
+						thisModule.filterInitAndMainProc(trgRB.processes, trgRB) 
+		
+					);
+					
+					--reset tmp counter for conditional selections
+					thisModule.ResetTmpCounter();
+					
+				}
+				
+				
+			}
+		}
+		
+		--- (b) init proc
+		for(initProc in thisModule.getInitProc(trgRB.processes, trgRB)){ --use loop to create initProc variable 
+			--TODO: check that only one init proc exists 			
+			
+			initProc.name.debug('(2) init process');
+			initProc.processTerm <- thisModule.MakeResumeProcessTerm(
+				--pass original init process as process to be invocated from new init
+				thisModule.findProcess(
+					trgRB.processes, 
+					thisModule.getMainModeProcName(trgRB)
+				)
+			);
+		}
+		
+		trgRB.debug('finished Declaring2Invoking RB');
+	}		
+}
+
+
+lazy rule ActionPrefix2Process {
+	from 
+		srcAP: HelenaText!ActionPrefix,
+		parentProcess : HelenaText!Process, 
+		resetCounter : Boolean
+	to
+		process : HelenaText!Process(
+			name <- thisModule.getFreshName(parentProcess)
+		)
+	do{
+		if(resetCounter){
+			--reset counter if demanded
+			thisModule.COUNTER_PER_PROCESS <- 1;
+		}else{
+			--increment counter for getFreshName()
+			thisModule.COUNTER_PER_PROCESS <- thisModule.COUNTER_PER_PROCESS + 1;
+			thisModule.COUNTER_PER_PROCESS;
+		}
+				
+		--return new process
+		process;
+	}
+}
+
+lazy rule ActionPrefix2ProcessInvocation{
+	from 
+		srcActionPrefix : HelenaText!ActionPrefix, 
+		nextProcsToInvoke : Sequence(HelenaText!Process), 
+		counter : Integer
+	to
+		procInvoc : HelenaText!ProcessInvocation(
+			process <- 	nextProcsToInvoke.at(counter)
+		)
+	do{
+		thisModule.ALREADY_HANDLED <- thisModule.ALREADY_HANDLED.including(counter);
+		procInvoc;
+	}
+}
+
+--Make rules
+
+--main proc, extended by interrupt/resume logic before actions prefixes
+rule InitMainProcess(parentRB : HelenaText!RoleBehavior, originalProcTerm : HelenaText!ProcessTerm){
+	to
+		mainProc : HelenaText!Process(
+			name <- thisModule.getMainModeProcName(parentRB), 
+			processTerm <- originalProcTerm
+		)
+	do{
+		mainProc;
+	}
+}
+--- resume mode process
+rule InitInitProcess(parentRB: HelenaText!RoleBehavior){
+	to
+		resumeProcess : HelenaText!Process(
+			name <- thisModule.getInitModeProcName(parentRB)
+		)
+	do{
+		thisModule.COUNTER_PER_PROCESS <- 1;
+		resumeProcess;
+	}
+}
+
+rule MakeResumeProcessTerm(nextProcess : HelenaText!Process){
+	to
+		resumeProcTerm : HelenaText!ActionPrefix(
+			action <- thisModule.MakeIncomingMessageCallWithEmptyParams('resume'),
+			processTerm <- thisModule.MakeProcessInvocation(nextProcess)
+		)
+	do{
+		resumeProcTerm;
+	}
+}
+
+
+rule MakeIncomingMessageCallWithEmptyParams(name : String){
+	to
+		incomingMsgCall: HelenaText!IncomingMessageCall(
+			msgName <- name, 
+			formalRoleParamsBlock <- HelenaText!FormalRoleParamsBlock.newInstance(), 
+			formalDataParamsBlock <- HelenaText!FormalDataParamsBlock.newInstance()
+		)
+	do{
+		incomingMsgCall; 
+	}
+}
+---create a ProcessInvocation object from a Process object
+rule MakeProcessInvocation(proc: HelenaText!Process){
+	to 
+		procInvocation : HelenaText!ProcessInvocation(
+			process <- proc
+		)
+	do{
+		procInvocation;
+	}
+}
+
+
+
+rule MakeConditionalSelection( ifGuard: HelenaText!Guard, orGuards: OrderedSet(HelenaText!Guard), 
+		ifProcTerm: HelenaText!ProcessTerm, orProcTerms : OrderedSet(HelenaText!ProcessTerm)){
+	to
+		conditionalSelection: HelenaText!ConditionalSelection(
+			ifGuard <- ifGuard, 
+			ifProcessTerm <- ifProcTerm, 
+			orGuards <- orGuards, 
+			orProcessTerms <- orProcTerms
+		)
+	do{
+		conditionalSelection;
+	}
+}
+
+rule MakeActionPrefix (action : HelenaText!Action, processTerm : HelenaText!ProcessTerm){
+	to
+		actionPrefix : HelenaText!ActionPrefix(
+			action <- action, 
+			processTerm <- processTerm
+		)
+	do{
+		actionPrefix; 
+	}
+}
+
+rule MakeProcess(name : String, procTerm : HelenaText!ProcessTerm) {
+	to
+		process : HelenaText!Process(
+			name <- name, 
+			processTerm <- procTerm
+		)
+	do{
+		process;
+	}
+}
+
+rule MakeTrueGuard(){
+	to
+		guard : HelenaText!NotTerm(
+			atom <- booleanValue
+		), 
+		booleanValue : HelenaText!BooleanValue(
+			value <- xboolean
+		), 
+		xboolean : HelenaText!XBooleanLiteral(
+			isTrue <- true 	
+		)
+	do{
+		guard;
+	}
+}
+
+rule MakeInterruptResumeProcTerm(originalActionPrefix: HelenaText!ActionPrefix, if_procToInvocate : HelenaText!Process, nextProcsToInvocate : Sequence(HelenaText!Process)) {
+	to
+		condSel : HelenaText!ConditionalSelection(
+			ifGuard <- thisModule.MakeTrueGuard(),
+			ifProcessTerm <- interruptResumeActionPrefix, 
+			orGuards <- Set{thisModule.MakeTrueGuard()},
+			orProcessTerms <- Set{mainActionPrefix}
+		), 
+		interruptResumeActionPrefix : HelenaText!ActionPrefix(
+			action <- thisModule.MakeIncomingMessageCallWithEmptyParams('interrupt'), 
+			processTerm <- thisModule.MakeActionPrefix(
+				thisModule.MakeIncomingMessageCallWithEmptyParams('resume'), 
+				thisModule.MakeProcessInvocation(if_procToInvocate)
+			)
+		), 
+		mainActionPrefix : HelenaText!ActionPrefix(
+			action <- originalActionPrefix.action, 
+			processTerm <- originalActionPrefix.processTerm.handleProcessTerm(nextProcsToInvocate, -1)
+		)
+		
+	do{
+		thisModule.ALREADY_HANDLED_AP <- thisModule.ALREADY_HANDLED_AP.including(thisModule.COUNTER_PER_PROCESS_AP);
+		condSel;
+	}
+}
+
+
+
+--Helper rules
+
+helper def : getParentRoleBehavior(actionPrefix : HelenaText!ActionPrefix) : HelenaText!RoleBehavior =
+	let parent : OclAny = 
+		actionPrefix.refImmediateComposite() in 
+	if(parent.oclIsTypeOf(HelenaText!RoleBehavior)) then
+		parent
+	else
+		thisModule.getParentRoleBehavior(parent)
+	endif
+; 
+
+
+helper def : isModeRoleBehavior(rb : HelenaText!RoleBehavior) : Boolean = 
+	not(rb.roleTypeRef.name = 'AdaptationManager') and 
+	not rb.roleTypeRef.name.endsWith('Sensor')
+;
+
+helper def : initModeBehaviorProcessesFromOriginalProcesses(parentRB : HelenaText!RoleBehavior, originalProcs : Sequence(HelenaText!Process)) : Set(HelenaText!Process) = 
+	let initProc : HelenaText!Process = 
+		thisModule.InitInitProcess(parentRB) in
+	let extendedOriginalProcs : Sequence(HelenaText!Process) = 
+		thisModule.initProcessesFromActionPrefixes(originalProcs) in 
+		Sequence{initProc}.union(originalProcs).union(extendedOriginalProcs)
+;
+		
+helper def : initModeBehaviorProcessesFromOriginalProcessTerm(parentRB : HelenaText!RoleBehavior, originalProcTerm : HelenaText!ProcessTerm) : Set(HelenaText!Process) = 
+	let initProc : HelenaText!Process = 
+		thisModule.InitInitProcess(parentRB) in
+	let mainProc : HelenaText!Process = 
+		thisModule.InitMainProcess(parentRB, originalProcTerm) in  
+	let extendedOriginalProcs : Sequence(HelenaText!Process) = 
+		thisModule.initProcessesFromActionPrefixesFromProcTerm(originalProcTerm, mainProc) in 
+		Sequence{initProc}.including(mainProc).union(extendedOriginalProcs)
+;
+		
+helper context HelenaText!ActionPrefix def : getActionPrefixes(foundActionPrefixes : Sequence(HelenaText!ActionPrefix)) : Sequence(HelenaText!ActionPrefix) = 
+	self.processTerm.getActionPrefixes(foundActionPrefixes.including(self)).flatten().asSequence()
+;
+ 
+helper context HelenaText!NilTerm def : getActionPrefixes(foundActionPrefixes : Sequence(HelenaText!ActionPrefix)) : Sequence(HelenaText!ActionPrefix) = 
+	foundActionPrefixes.flatten().asSequence()
+;
+
+helper context HelenaText!ProcessInvocation def : getActionPrefixes(foundActionPrefixes : Sequence(HelenaText!ActionPrefix)) : Sequence(HelenaText!ActionPrefix) = 
+	foundActionPrefixes.flatten().asSequence()
+;
+helper context HelenaText!ConditionalSelection def : getActionPrefixes(foundActionPrefixes : Sequence(HelenaText!ActionPrefix)) : Sequence(HelenaText!ActionPrefix) = 
+	let actionPrefsFromIfProcTerm : Sequence(HelenaText!ActionPrefix) = 
+		self.ifProcessTerm.getActionPrefixes(Sequence{}).asSequence() in 
+	let actionPrefsFromOrProcTerms : Sequence(HelenaText!ActionPrefix) = 
+		self.orProcessTerms -> collect( procTerm | procTerm.getActionPrefixes(Sequence{})).flatten().asSequence() in 
+	foundActionPrefixes.union(actionPrefsFromIfProcTerm).union(actionPrefsFromOrProcTerms).flatten().asSequence()
+;
+
+
+
+---returns original and/or new processes
+helper def : initProcessesFromActionPrefixes(processes : Sequence(HelenaText!Process)) : Sequence(HelenaText!Process) = 
+	let procsFromActionsPrefs : Set(HelenaText!ActionPrefix) = 
+		processes->collect(proc |  
+			let procTerm : HelenaText!ProcessTerm = 
+				proc.processTerm in 
+			let newProcs : Set(HelenaText!Process) = 
+				thisModule.initProcessesFromActionPrefixesFromProcTerm(procTerm, proc) in 
+			newProcs
+		)
+	in procsFromActionsPrefs.flatten()
+;
+
+helper def : initProcessesFromActionPrefixesFromProcTerm(procTerm : HelenaText!ProcessTerm, parentProc : HelenaText!Process) : Sequence(HelenaText!Process) = 
+	let actionPrefsForProc: Set(HelenaText!ActionPrefix) = 
+			procTerm.getActionPrefixes(Sequence{}) in 
+	let newProcs : Set(HelenaText!Process) = 
+		actionPrefsForProc->collect(actionPref |
+			if(thisModule.COUNTER_PER_PROCESS = actionPrefsForProc.size()) then
+				thisModule.ActionPrefix2Process(actionPref, parentProc, true)
+			else
+				thisModule.ActionPrefix2Process(actionPref, parentProc, false)
+			endif
+		) in 
+	newProcs
+;
+
+helper context HelenaText!ActionPrefix def : handleProcessTerm(nextProcsToInvoke: Sequence(HelenaText!Process), counter: Integer) : HelenaText!ProcessTerm = 
+	let actualCounter : Integer = 
+		if(counter = -1) then
+			thisModule.COUNTER_PER_PROCESS
+		else
+			counter
+		endif
+	in 
+	thisModule.ActionPrefix2ProcessInvocation(
+		self, 
+		nextProcsToInvoke, 
+		actualCounter
+	)
+;
+
+helper context HelenaText!NilTerm def : handleProcessTerm(nextProcsToInvoke: Sequence(HelenaText!Process), counter : Integer) : HelenaText!ProcessTerm = 
+	self
+;
+
+helper context HelenaText!ConditionalSelection def : handleProcessTerm(nextProcsToInvoke: Sequence(HelenaText!Process), counter : Integer) : HelenaText!ProcessTerm = 
+	let ifGuard : HelenaText!Guard = 
+		self.ifGuard in 
+	let orGuards : OrderedSet(HelenaText!Guard) =
+		self.orGuards.flatten().asOrderedSet() in 
+	
+	let setTmpCounterToMax : Boolean = 
+		thisModule.SetTmpCounter(
+			thisModule.getMax(thisModule.TMP_COUNTER, thisModule.COUNTER_PER_PROCESS)
+		) in 	
+	
+	let ifProcTerm : HelenaText!ProcessTerm = 
+		self.ifProcessTerm  in 
+	let orProcTerms: OrderedSet(HelenaText!ProcessTerm) = 
+		self.orProcessTerms.asOrderedSet() in
+	let newIfProcTerm : HelenaText!ProcessTerm = 
+		ifProcTerm.handleProcessTerm(nextProcsToInvoke, -1) in 
+	
+	let incrementedCounter : Integer = 
+		thisModule.IncrementTmpCounterByValue(
+			ifProcTerm.getActionPrefixes(Sequence{}).size()
+		) in 
+	let newOrProcTerms : OrderedSet(HelenaText!ProcessTerm) = 
+		if(orProcTerms.size() = 1) then
+			OrderedSet{
+				orProcTerms.first().handleProcessTerm(nextProcsToInvoke, thisModule.TMP_COUNTER)
+			}.asOrderedSet().debug('RESOLVING PREV BLOCK! DONT REMOVE THIS DEBUG COMMAND!')
+		else
+			orProcTerms->collect(orProcTerm | 
+				let handledProcTerm : HelenaText!ProcessTerm = 
+					orProcTerm.handleProcessTerm(nextProcsToInvoke, thisModule.TMP_COUNTER) in
+				let incrementedCounter2 : Integer = 
+					thisModule.IncrementTmpCounterByValue(
+						orProcTerm.getActionPrefixes(Sequence{}).size()
+					) in
+				handledProcTerm
+			).asOrderedSet().debug('RESOLVING PREV BLOCK! DONT REMOVE THIS DEBUG COMMAND!') --DO NOT REMOVE DEBUG MSG, SINCE IT CAUSES RESOLUTION OF PREV BLOCK
+		endif
+			
+		in 
+		
+	let resetTmpCounter2 : Boolean = 
+		thisModule.ResetTmpCounter() in 
+	thisModule.MakeConditionalSelection(ifGuard, orGuards, newIfProcTerm, newOrProcTerms)
+; 
+
+helper context HelenaText!ProcessInvocation def : handleProcessTerm(nextProcsToInvoke: Sequence(HelenaText!Process), counter : Integer) : HelenaText!ProcessTerm = 
+	self
+;
+
+helper def : findProcess(processes : Sequence(HelenaText!Process), name : String) : HelenaText!Process = 
+	let foundProcs : Sequence(HelenaText!Process) = 
+		processes->select(proc | proc.name = name) in 
+	if(foundProcs.size() = 0) then 
+		HelenaText!Process.newInstance().debug('Error: Process ' + name + ' not found!') 
+	else
+		foundProcs.first()
+	endif
+;
+
+helper def : getInitModeProcName(rb : HelenaText!RoleBehavior) : String = 
+	let rb_name : String = rb.roleTypeRef.name in 
+	'Init' + thisModule.toFirstUpper(rb_name) + 'Proc' 
+;
+
+helper def : getMainModeProcName(rb : HelenaText!RoleBehavior) : String = 
+	let rb_name : String = rb.roleTypeRef.name in 
+	'Main' + thisModule.toFirstUpper(rb_name) + 'Proc' 
+;
+	
+helper def : getFreshName(parentProcess : HelenaText!Process) : String = 
+	parentProcess.name + thisModule.SEPARATOR + thisModule.COUNTER_PER_PROCESS.toString()
+; 
+	
+helper def : getOriginalProcessName(name : String) : String = 
+	let index : Integer = name.lastIndexOf(thisModule.SEPARATOR) in 
+	name.substring(1,  (index - 1))
+;	
+
+---First counter value always has to be 1, since the Sequence function starts counting at 1
+helper def : SEPARATOR : String = '___';
+helper def : COUNTER_PER_PROCESS : Integer = 1;
+helper def : COUNTER_PER_PROCESS_AP : Integer = 1;
+helper def : ALREADY_HANDLED : Set(Integer) = Set{};
+helper def : ALREADY_HANDLED_AP : Set(Integer) = Set{};
+helper def : TMP_COUNTER : Integer = 1;
+
+
+helper def : toFirstUpper(text : String) : String = 
+	text.substring(1, 1).toUpper() + text.substring(2, text.size())
+;
+
+helper  def : containsElementWithName( procs : Set(HelenaText!Process), name : String) : Boolean = 
+	let names : Set(String) = 
+		procs->collect(proc | proc.name) in 
+	if names.includes(name) then 
+		true
+	else
+		false
+	endif
+;
+
+
+--get subset of all processes
+
+helper def : getMainProc(allProcs: Sequence(HelenaText!Process), parentRB : HelenaText!RoleBehavior) : Sequence(HelenaText!Process) = 
+	allProcs->select (proc | 
+		proc.name = thisModule.getMainModeProcName(parentRB)
+	).asSequence()
+;
+
+helper def : getInitProc(allProcs: Sequence(HelenaText!Process), parentRB : HelenaText!RoleBehavior) : Sequence(HelenaText!Process) = 
+	allProcs->select (proc | 
+		proc.name = thisModule.getInitModeProcName(parentRB)
+	).asSequence()
+;
+
+helper def : getOriginalProcs(allProcs: Sequence(HelenaText!Process), originalProcs : Set(HelenaText!Process)) : Sequence(HelenaText!Process) =
+	allProcs->select(proc | 
+		thisModule.containsElementWithName(originalProcs, proc.name)	
+	).asSequence()
+;
+
+helper def : getNewProcs(allProcs: Sequence(HelenaText!Process), originalProcs: Set(HelenaText!Process), parentRB : HelenaText!RoleBehavior) : Sequence(HelenaText!Process) = 
+	allProcs->select(proc | 
+		not(
+			thisModule.containsElementWithName(originalProcs, proc.name) or 
+			proc.name = thisModule.getInitModeProcName(parentRB)
+		)
+	).asSequence()
+;
+
+helper def : getNewProcsForOriginalProc(newProcs: Sequence(HelenaText!Process), originalProc: HelenaText!Process) : Sequence(HelenaText!Process) = 
+	newProcs->select(proc | 
+		proc.name.toString().startsWith(originalProc.name + thisModule.SEPARATOR)	
+	).flatten().asSequence()
+;
+
+helper def : filterInitAndMainProc(allProcs: Sequence(HelenaText!Process), parentRB: HelenaText!RoleBehavior): HelenaText!Process = 
+	let initProcName : String = thisModule.getInitModeProcName(parentRB) in 
+	let mainProcName : String = thisModule.getMainModeProcName(parentRB) in 
+	let allButMainAndInit : Sequence(HelenaText!Process) = 
+		allProcs->select( proc | not (proc.name = initProcName) and not(proc.name = mainProcName)) in 
+	allButMainAndInit.asSequence()
+;	
+
+
+helper def : getNextNewProc(allNewProcs : Sequence(HelenaText!Process), index : Integer) : HelenaText!Process = 
+	if(allNewProcs.size() < index ) then
+		allNewProcs.first() -- won't be needed
+	else
+		allNewProcs.at(index) --first possible index for sequence is 1! 
+	endif
+;
+
+helper def : getNextActionPrefix(allActionPrefixes : Sequence(HelenaText!Process), index_starting_from_1: Integer) : HelenaText!Process = 
+	if(allActionPrefixes.size() < index_starting_from_1 ) then
+		allActionPrefixes.first().debug('ERROR in getNextActionPrefix: wrong index') -- won't be used
+	else
+		allActionPrefixes.at(index_starting_from_1) --first possible index for sequence is 1!
+	endif
+;
+	
+helper def : range : Sequence(Integer) = Sequence{};
+helper def : getNextHigherCounter() : Integer = 
+	thisModule.range->select( number | 
+		if(thisModule.ALREADY_HANDLED.includes(number)) then
+			false	
+		else
+			true
+		endif
+	).first()
+	
+;
+
+helper def : getNextHigherCounterAP() : Integer = 
+	thisModule.range->select( number | 
+		if(thisModule.ALREADY_HANDLED_AP.includes(number)) then
+			false	
+		else
+			true
+		endif
+	).first()
+	
+;
+
+helper def : getMax(value1 : Integer, value2 : Integer) : Integer = 
+	if(value1 > value2) then
+		value1
+	else
+		value2
+	endif
+;
